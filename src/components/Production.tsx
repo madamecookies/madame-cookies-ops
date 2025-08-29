@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Camera } from 'lucide-react';
+import { CameraCapture } from './CameraCapture';
 
 interface MatierePremiere {
   nom: string;
@@ -91,6 +92,7 @@ export const Production: React.FC = () => {
   }>>([]);
 
   const [showCamera, setShowCamera] = useState<string | null>(null);
+  const [photosData, setPhotosData] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     // Auto-générer le numéro de lot au chargement
@@ -144,7 +146,24 @@ export const Production: React.FC = () => {
 
   const ouvrirCamera = (mpNom: string) => {
     setShowCamera(mpNom);
-    // TODO: Implémenter l'ouverture de la caméra
+  };
+
+  const handleCameraCapture = (imageData: string) => {
+    if (showCamera) {
+      setPhotosData(prev => ({
+        ...prev,
+        [showCamera]: imageData
+      }));
+      
+      // Auto-extraire le numéro de lot depuis l'image (simulation OCR simple)
+      // TODO: Implémenter vraie OCR avec Tesseract.js
+      const mockLotNumber = `LOT${Date.now().toString().slice(-6)}`;
+      const mpIndex = matieresPremieresData.findIndex(mp => mp.nom === showCamera);
+      if (mpIndex !== -1) {
+        handleMPChange(mpIndex, 'lot', mockLotNumber);
+      }
+    }
+    setShowCamera(null);
   };
 
   const validerProduction = () => {
@@ -344,13 +363,26 @@ export const Production: React.FC = () => {
                   </div>
                 </div>
                 
-                <button 
-                  onClick={() => ouvrirCamera(mp.nom)}
-                  className="btn-primary w-full text-sm"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  📷 Étiquette (OCR)
-                </button>
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => ouvrirCamera(mp.nom)}
+                    className="btn-primary w-full text-sm"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    📷 Étiquette (OCR)
+                  </button>
+                  
+                  {photosData[mp.nom] && (
+                    <div className="text-center">
+                      <img 
+                        src={photosData[mp.nom]} 
+                        alt="Photo étiquette" 
+                        className="w-20 h-20 object-cover rounded border mx-auto"
+                      />
+                      <p className="text-xs text-green-600 mt-1">✓ Photo capturée</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -366,6 +398,14 @@ export const Production: React.FC = () => {
           Enregistrer Production
         </button>
       </div>
+
+      {/* Camera Component */}
+      <CameraCapture
+        isOpen={!!showCamera}
+        title={`Photo étiquette: ${showCamera || ''}`}
+        onCapture={handleCameraCapture}
+        onClose={() => setShowCamera(null)}
+      />
     </div>
   );
 };
