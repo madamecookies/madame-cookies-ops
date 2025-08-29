@@ -2,41 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Madame Cookies Design System - Violet Theme Mobile-First */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand colors - Madame Cookies violet theme */
+    --background: 250 100% 99%;
+    --foreground: 260 15% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 250 50% 98%;
+    --card-foreground: 260 15% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 250 50% 98%;
+    --popover-foreground: 260 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Madame Cookies violet */
+    --primary: 270 75% 60%;
+    --primary-foreground: 250 100% 99%;
+    --primary-hover: 270 75% 55%;
+    --primary-light: 270 50% 85%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Soft violet */
+    --secondary: 270 20% 92%;
+    --secondary-foreground: 260 15% 25%;
+    --secondary-hover: 270 25% 88%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Success - Green accent */
+    --success: 142 76% 36%;
+    --success-foreground: 250 100% 99%;
+    --success-light: 142 50% 90%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Warning - Orange accent */  
+    --warning: 35 91% 62%;
+    --warning-foreground: 260 15% 15%;
+    --warning-light: 35 50% 90%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Red accent */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 250 100% 99%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Neutral grays */
+    --muted: 270 15% 95%;
+    --muted-foreground: 260 10% 45%;
 
-    --radius: 0.5rem;
+    --accent: 270 50% 85%;
+    --accent-foreground: 260 15% 25%;
+
+    --border: 270 20% 88%;
+    --input: 270 20% 92%;
+    --ring: 270 75% 60%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270, 75%, 60%), hsl(280, 65%, 70%));
+    --gradient-card: linear-gradient(135deg, hsl(250, 50%, 98%), hsl(270, 30%, 96%));
+    --gradient-hero: linear-gradient(135deg, hsl(270, 75%, 60%), hsl(260, 85%, 55%));
+
+    /* Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(270 50% 60% / 0.15);
+    --shadow-button: 0 2px 8px -2px hsl(270 75% 60% / 0.2);
+    --shadow-elevated: 0 8px 32px -8px hsl(270 50% 60% / 0.25);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +130,132 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first optimizations */
+  html {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* JavaScript enhancement detection */
+  .js-enabled {
+    display: block;
+  }
+
+  body:not(.js-disabled) .hidden {
+    display: none !important;
+  }
+
+  body.js-disabled .js-enabled {
+    display: none !important;
+  }
+
+  /* CSS fallback for tabs without JavaScript */
+  .hidden.target\:block:target {
+    display: block !important;
+  }
+}
+
+@layer components {
+  /* Tab navigation styles */
+  .tab-navigation {
+    @apply flex overflow-x-auto scrollbar-hide;
+    @apply border-b border-border bg-background/95 backdrop-blur-sm;
+    @apply sticky top-0 z-40;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tab-link {
+    @apply flex-shrink-0 px-4 py-3 text-sm font-medium;
+    @apply text-muted-foreground hover:text-foreground;
+    @apply border-b-2 border-transparent;
+    @apply transition-colors duration-200;
+    @apply min-w-max;
+    scroll-snap-align: start;
+  }
+
+  .tab-link.active {
+    @apply text-primary border-primary bg-primary/5;
+  }
+
+  /* Card styles */
+  .card-elegant {
+    @apply rounded-xl border bg-card text-card-foreground;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5;
+    @apply bg-primary text-primary-foreground font-medium;
+    @apply hover:bg-primary/90 active:scale-95;
+    @apply transition-all duration-200;
+    box-shadow: var(--shadow-button);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5;
+    @apply bg-secondary text-secondary-foreground font-medium;
+    @apply hover:bg-secondary-hover;
+    @apply transition-all duration-200;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5;
+    @apply bg-success text-success-foreground font-medium;
+    @apply hover:bg-success/90;
+    @apply transition-all duration-200;
+  }
+
+  .btn-warning {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5;
+    @apply bg-warning text-warning-foreground font-medium;
+    @apply hover:bg-warning/90;
+    @apply transition-all duration-200;
+  }
+
+  /* Mobile input styles */
+  .input-mobile {
+    @apply w-full rounded-lg border border-input bg-background px-3 py-2.5;
+    @apply text-base text-foreground placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply transition-all duration-200;
+    min-height: 44px; /* Touch target size */
+  }
+
+  /* Camera styles */
+  .camera-container {
+    @apply relative rounded-lg overflow-hidden bg-muted;
+    aspect-ratio: 4/3;
+  }
+
+  .camera-video {
+    @apply w-full h-full object-cover;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent;
+  }
+
+  /* Scrollbar hide for mobile */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
