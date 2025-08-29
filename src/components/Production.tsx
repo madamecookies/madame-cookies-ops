@@ -37,6 +37,15 @@ interface ProductionData {
   datetime: string;
 }
 
+const OPERATEURS = [
+  'WENDY',
+  'THIBAUD', 
+  'RAPHAEL',
+  'DAMIEN',
+  'AMELIE',
+  'NYLAIME'
+];
+
 const RECETTES: RecetteMP = {
   '3_CHOCOLAT': [
     { nom: 'Farine T55', quantiteBase: 500, unite: 'g' },
@@ -80,6 +89,7 @@ export const Production: React.FC = () => {
     fin: '',
     temperature: '',
     observations: '',
+    operateur: '',
   });
 
   const [matieresPremieresData, setMatieresPremieresData] = useState<Array<{
@@ -148,19 +158,22 @@ export const Production: React.FC = () => {
     setShowCamera(mpNom);
   };
 
-  const handleCameraCapture = (imageData: string) => {
+  const handleCameraCapture = (imageData: string, ocrResult?: { lot?: string; dlc?: string }) => {
     if (showCamera) {
       setPhotosData(prev => ({
         ...prev,
         [showCamera]: imageData
       }));
       
-      // Auto-extraire le numéro de lot depuis l'image (simulation OCR simple)
-      // TODO: Implémenter vraie OCR avec Tesseract.js
-      const mockLotNumber = `LOT${Date.now().toString().slice(-6)}`;
+      // Utiliser les résultats de l'OCR pour pré-remplir les champs
       const mpIndex = matieresPremieresData.findIndex(mp => mp.nom === showCamera);
       if (mpIndex !== -1) {
-        handleMPChange(mpIndex, 'lot', mockLotNumber);
+        if (ocrResult?.lot) {
+          handleMPChange(mpIndex, 'lot', ocrResult.lot);
+        }
+        if (ocrResult?.dlc) {
+          handleMPChange(mpIndex, 'dlc', ocrResult.dlc);
+        }
       }
     }
     setShowCamera(null);
@@ -176,8 +189,8 @@ export const Production: React.FC = () => {
     }
 
     // Validation des champs obligatoires
-    if (!formData.variete || !formData.quantite || !formData.debut) {
-      alert('Veuillez remplir tous les champs obligatoires');
+    if (!formData.operateur || !formData.variete || !formData.quantite || !formData.debut) {
+      alert('Veuillez remplir tous les champs obligatoires (opérateur, variété, quantité, heure début)');
       return;
     }
 
@@ -212,6 +225,7 @@ export const Production: React.FC = () => {
       fin: '',
       temperature: '',
       observations: '',
+      operateur: '',
     });
     setMatieresPremieresData([]);
   };
@@ -250,6 +264,20 @@ export const Production: React.FC = () => {
             >
               ↻
             </button>
+          </div>
+
+          <div>
+            <Label htmlFor="operateur">Opérateur *</Label>
+            <Select onValueChange={(value) => handleInputChange('operateur', value)}>
+              <SelectTrigger className="input-mobile">
+                <SelectValue placeholder="Choisir un opérateur" />
+              </SelectTrigger>
+              <SelectContent>
+                {OPERATEURS.map(op => (
+                  <SelectItem key={op} value={op}>{op}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

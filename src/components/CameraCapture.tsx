@@ -2,9 +2,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera, X, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import Tesseract from 'tesseract.js';
 
 interface CameraCaptureProps {
-  onCapture: (imageData: string) => void;
+  onCapture: (imageData: string, ocrResult?: { lot?: string; dlc?: string }) => void;
   onClose: () => void;
   isOpen: boolean;
   title: string;
@@ -21,6 +22,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string>('');
+  const [isProcessingOCR, setIsProcessingOCR] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -70,7 +72,68 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
   };
 
-  const capturePhoto = () => {
+  const processOCR = async (imageData: string): Promise<{ lot?: string; dlc?: string }> => {
+    try {
+      setIsProcessingOCR(true);
+      
+      const result = await Tesseract.recognize(imageData, 'fra+eng', {
+        logger: m => console.log(m)
+      });
+      
+      const text = result.data.text.toUpperCase();
+      console.log('OCR Text detected:', text);
+      
+      // Extraction du numéro de lot (formats courants)
+      const lotPatterns = [
+        /LOT\s*:?\s*([A-Z0-9-]+)/i,
+        /L\s*:?\s*([A-Z0-9-]+)/i,
+        /BATCH\s*:?\s*([A-Z0-9-]+)/i,
+        /([A-Z]{1,3}\d{6,})/,
+        /(\d{6,}[A-Z]*)/
+      ];
+      
+      let lot;
+      for (const pattern of lotPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+          lot = match[1];
+          break;
+        }
+      }
+      
+      // Extraction de la DLC (différents formats de date)
+      const dlcPatterns = [
+        /(\d{2})\/(\d{2})\/(\d{4})/,  // DD/MM/YYYY
+        /(\d{2})\.(\d{2})\.(\d{4})/,  // DD.MM.YYYY
+        /(\d{4})-(\d{2})-(\d{2})/,    // YYYY-MM-DD
+        /(\d{2})-(\d{2})-(\d{4})/     // DD-MM-YYYY
+      ];
+      
+      let dlc;
+      for (const pattern of dlcPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+          if (pattern.source.includes('\\d{4})-')) {
+            // YYYY-MM-DD format
+            dlc = `${match[1]}-${match[2]}-${match[3]}`;
+          } else {
+            // DD/MM/YYYY or DD.MM.YYYY or DD-MM-YYYY format
+            dlc = `${match[3]}-${match[2]}-${match[1]}`;
+          }
+          break;
+        }
+      }
+      
+      return { lot, dlc };
+    } catch (error) {
+      console.error('Erreur OCR:', error);
+      return {};
+    } finally {
+      setIsProcessingOCR(false);
+    }
+  };
+
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
@@ -85,7 +148,10 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     ctx.drawImage(video, 0, 0);
     
     const imageData = canvas.toDataURL('image/jpeg', 0.8);
-    onCapture(imageData);
+    
+    // Traitement OCR
+    const ocrResult = await processOCR(imageData);
+    onCapture(imageData, ocrResult);
     onClose();
   };
 
@@ -97,13 +163,17 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={(e) => {
+        onChange={async (e) => {
           const file = e.target.files?.[0];
           if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
               if (event.target?.result) {
-                onCapture(event.target.result as string);
+                const imageData = event.target.result as string;
+                
+                // Traitement OCR
+                const ocrResult = await processOCR(imageData);
+                onCapture(imageData, ocrResult);
                 onClose();
               }
             };
@@ -160,8 +230,14 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                 />
               </div>
               
+              {isProcessingOCR && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-600">🔍 Analyse OCR en cours...</p>
+                </div>
+              )}
+              
               <div className="flex gap-2">
-                <Button onClick={capturePhoto} className="flex-1">
+                <Button onClick={capturePhoto} className="flex-1" disabled={isProcessingOCR}>
                   <Camera className="w-4 h-4 mr-2" />
                   Prendre la photo
                 </Button>

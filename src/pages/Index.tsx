@@ -47,30 +47,7 @@ const Index = () => {
       />
       
       <main className="pb-safe">
-        {/* Fallback CSS-only navigation for browsers without JS */}
-        <div id="dashboard" className="hidden target:block">
-          <Dashboard />
-        </div>
-        <div id="temperatures" className="hidden target:block">
-          <Temperatures />
-        </div>
-        <div id="production" className="hidden target:block">
-          <Production />
-        </div>
-        <div id="nettoyage" className="hidden target:block">
-          <Nettoyage />
-        </div>
-        <div id="reception" className="hidden target:block">
-          <Reception />
-        </div>
-        <div id="exports" className="hidden target:block">
-          <Exports />
-        </div>
-        
-        {/* JavaScript-enhanced content (preferred) */}
-        <div className="js-enabled">
-          {renderTabContent()}
-        </div>
+        {renderTabContent()}
       </main>
     </div>
   );
