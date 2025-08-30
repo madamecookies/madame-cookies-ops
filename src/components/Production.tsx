@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Camera } from 'lucide-react';
-import { CameraCapture } from './CameraCapture';
+import { AdvancedOCR } from './AdvancedOCR';
 
 interface MatierePremiere {
   nom: string;
@@ -44,6 +44,13 @@ const OPERATEURS = [
   'DAMIEN',
   'AMELIE',
   'NYLAIME'
+];
+
+const FOURNISSEURS = [
+  'FRAIS IMPORT',
+  'REUDIS',
+  'PATELLIN', 
+  'OVOCOOP'
 ];
 
 const RECETTES: RecetteMP = {
@@ -428,7 +435,7 @@ export const Production: React.FC = () => {
       </div>
 
       {/* Camera Component */}
-      <CameraCapture
+      <AdvancedOCR
         isOpen={!!showCamera}
         title={`Photo étiquette: ${showCamera || ''}`}
         onCapture={handleCameraCapture}

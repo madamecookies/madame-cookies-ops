@@ -3,18 +3,13 @@ import { Card } from '@/components/ui/card';
 
 export const Dashboard: React.FC = () => {
   const stats = [
-    { label: 'Productions du jour', value: '12', color: 'text-primary' },
-    { label: 'Températures relevées', value: '8', color: 'text-success' },
-    { label: 'Nettoyages effectués', value: '3', color: 'text-warning' },
-    { label: 'Réceptions en attente', value: '2', color: 'text-destructive' },
+    { label: 'Productions du jour', value: '0', color: 'text-primary' },
+    { label: 'Températures relevées', value: '0', color: 'text-success' },
+    { label: 'Nettoyages effectués', value: '0', color: 'text-warning' },
+    { label: 'Réceptions en attente', value: '0', color: 'text-destructive' },
   ];
 
-  const recentActivities = [
-    { time: '14:30', action: 'Production 3 CHOCOLAT terminée', type: 'production' },
-    { time: '14:15', action: 'Relevé température four: 180°C', type: 'temperature' },
-    { time: '13:45', action: 'Nettoyage plan de travail', type: 'cleaning' },
-    { time: '13:30', action: 'Réception farine T55 - 25kg', type: 'reception' },
-  ];
+  const recentActivities: Array<{time: string, action: string, type: string}> = [];
 
   return (
     <div className="p-4 space-y-6">
@@ -47,16 +42,22 @@ export const Dashboard: React.FC = () => {
           Activités récentes
         </h2>
         <div className="space-y-3">
-          {recentActivities.map((activity, index) => (
-            <div key={index} className="flex items-start space-x-3 p-2 rounded-lg bg-muted/50">
-              <div className="text-sm font-medium text-primary min-w-12">
-                {activity.time}
-              </div>
-              <div className="text-sm text-foreground flex-1">
-                {activity.action}
-              </div>
+          {recentActivities.length === 0 ? (
+            <div className="text-center text-muted-foreground py-4">
+              Aucune activité récente
             </div>
-          ))}
+          ) : (
+            recentActivities.map((activity, index) => (
+              <div key={index} className="flex items-start space-x-3 p-2 rounded-lg bg-muted/50">
+                <div className="text-sm font-medium text-primary min-w-12">
+                  {activity.time}
+                </div>
+                <div className="text-sm text-foreground flex-1">
+                  {activity.action}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Card>
 
